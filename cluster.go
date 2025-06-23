@@ -215,6 +215,7 @@ func (c *clusterClient) _refresh() (err error) {
 				// do not include unhealhty connections in this refresh cycle
 				if cc, ok := c.conns[nodeInfo.Addr]; ok {
 					if cc.conn.IsServerUnHealthy() {
+						globalLogger.Debugf("valkey node: %s is unhealthy, skipping in this refresh cycle", nodeInfo.Addr)
 						continue
 					}
 				}
@@ -225,6 +226,7 @@ func (c *clusterClient) _refresh() (err error) {
 				// do not include unhealhty connections in this refresh cycle
 				if cc, ok := c.conns[nodeInfo.Addr]; ok {
 					if cc.conn.IsServerUnHealthy() {
+						globalLogger.Debugf("valkey node: %s is unhealthy, skipping in this refresh cycle", nodeInfo.Addr)
 						continue
 					}
 				}
@@ -540,6 +542,7 @@ process:
 	case RedirectLoadingRetry:
 		// mark the associated node temporarily unhealthy
 		cc.SetServerUnHealthy()
+		globalLogger.Debugf("valkey node: %s is loading, this node will be ignored for a while", addr)
 		c.refresh(ctx) // on-demand refresh
 		fallthrough
 	case RedirectRetry:

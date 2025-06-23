@@ -430,6 +430,8 @@ func (m *mux) IsServerUnHealthy() bool {
 		return true
 	}
 	m.serverUnhealthystatus.Store(0) // reset the status if the timeout has passed
+	globalLogger.Debugf("marking the node %s healthy again", m.dst)
+
 	return false
 }
 
