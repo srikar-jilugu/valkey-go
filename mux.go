@@ -443,6 +443,7 @@ func (m *mux) Addr() string {
 }
 
 func (m *mux) setLoadingStatus(ctx context.Context) {
+	globalLogger.Debugf("[valkey]setting loading status of node %s", m.dst)
 	w := m.pipe(ctx, 0)
 	res := w.Do(ctx, cmds.InfoPersistenceCmd)
 	r := res.String()
@@ -453,7 +454,7 @@ func (m *mux) setLoadingStatus(ctx context.Context) {
 			// this sets when the loading status will be expired
 			etaTime := time.Now().Add(time.Duration(eta) * time.Second).Unix()
 			m.nodeLoadingStatus.CompareAndSwap(0, uint32(etaTime))
-
+			globalLogger.Debugf("[valkey]node %s is loading, eta %d seconds, will be healthy again at %s", m.dst, eta, time.Unix(etaTime, 0).Format(time.RFC3339))
 		}
 	}
 
@@ -471,7 +472,7 @@ func (m *mux) IsLoading() bool {
 	}
 
 	m.nodeLoadingStatus.Store(0) // reset the status if expired
-	globalLogger.Debugf("marking the node %s healthy again", m.dst)
+	globalLogger.Debugf("[valkey]loading status is expired, marking the node %s healthy again", m.dst)
 
 	return false
 }

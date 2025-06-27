@@ -252,8 +252,9 @@ func (c *clusterClient) _refresh() (err error) {
 		for i := 1; i < len(g.nodes); i++ {
 			if cc, ok := conns[g.nodes[i].Addr]; ok {
 				if !cc.conn.IsLoading() {
-					globalLogger.Debugf("valkey node: %s is healthy, will be considered for replica", g.nodes[i].Addr)
 					replicaNodesToConsider = append(replicaNodesToConsider, g.nodes[i])
+				} else {
+					globalLogger.Debugf("[valkey]node %s is loading, skipping it for slot assignment", g.nodes[i].Addr)
 				}
 			}
 		}
