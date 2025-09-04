@@ -202,8 +202,6 @@ func _newPipe(ctx context.Context, connFn func(context.Context) (net.Conn, error
 		timeout = DefaultDialTimeout
 	}
 
-	fmt.Println("setting dial timeout for ctx", timeout)
-
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
