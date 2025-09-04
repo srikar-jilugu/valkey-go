@@ -38,7 +38,7 @@ type mockConn struct {
 	ReceiveOverride map[string]func(ctx context.Context, subscribe Completed, fn func(message PubSubMessage)) error
 }
 
-func (m *mockConn) IsLoading() bool {
+func (m *mockConn) InUnHealthy() bool {
 	return true
 }
 

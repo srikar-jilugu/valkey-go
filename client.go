@@ -29,7 +29,9 @@ func newSingleClient(opt *ClientOption, prev conn, connFn connFn, retryer retryH
 
 	conn := connFn(opt.InitAddress[0], opt)
 	conn.Override(prev)
+	globalLogger.Infof("[valkey] dialing single connection to: %s", conn.Addr())
 	if err := conn.Dial(); err != nil {
+		globalLogger.Errorf("[valkey] error dialing single connection to %s, err: %w", conn.Addr(), err)
 		return nil, err
 	}
 	return newSingleClientWithConn(conn, cmds.NewBuilder(cmds.NoSlot), !opt.DisableRetry, opt.DisableCache, retryer), nil

@@ -87,11 +87,15 @@ func newClusterClient(opt *ClientOption, connFn connFn, retryer retryHandler) (*
 		return cc
 	}
 
+	globalLogger.Infof("[valkey]cluster client init with %d initial addresses", len(opt.InitAddress))
 	if err := client.init(); err != nil {
+		globalLogger.Errorf("[valkey]cluster client init failed: %v", err)
 		return nil, err
 	}
 
+	globalLogger.Infof("[valkey]cluster client initialized with %d connections", len(client.conns))
 	if err := client.refresh(context.Background()); err != nil {
+		globalLogger.Errorf("[valkey]cluster client refresh failed: %v", err)
 		return client, err
 	}
 
@@ -251,10 +255,10 @@ func (c *clusterClient) _refresh() (err error) {
 		// consider only healthy replica nodes for conn assignment to slots
 		for i := 1; i < len(g.nodes); i++ {
 			if cc, ok := conns[g.nodes[i].Addr]; ok {
-				if !cc.conn.IsLoading() {
+				if !cc.conn.InUnHealthy() {
 					replicaNodesToConsider = append(replicaNodesToConsider, g.nodes[i])
 				} else {
-					globalLogger.Debugf("[valkey]node %s is loading, skipping it for slot assignment", g.nodes[i].Addr)
+					globalLogger.Debugf("[valkey]node %s is unhealthy (could be due to timeouts or loading state), skipping it for slot assignment", g.nodes[i].Addr)
 				}
 			}
 		}
@@ -539,7 +543,6 @@ process:
 		resultsp.Put(results)
 		goto process
 	case RedirectLoadingRetry:
-
 		c.refresh(ctx) // on-demand refresh
 		fallthrough
 	case RedirectRetry:
