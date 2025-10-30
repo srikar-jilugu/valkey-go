@@ -1254,9 +1254,6 @@ func (c *clusterClient) shouldRefreshRetry(err error, ctx context.Context) (addr
 				mode = RedirectAsk
 			} else if err.IsClusterDown() || err.IsTryAgain() {
 				mode = RedirectRetry
-				// if err.IsLoading() {
-				// 	c.refresh(ctx) // refresh the cluster topology if loading.
-				// }
 			} else if err.IsLoading() {
 				mode = RedirectLoadingRetry
 			}
