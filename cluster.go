@@ -255,10 +255,12 @@ func (c *clusterClient) _refresh() (err error) {
 		// consider only healthy replica nodes for conn assignment to slots
 		for i := 1; i < len(g.nodes); i++ {
 			if cc, ok := conns[g.nodes[i].Addr]; ok {
-				if !cc.conn.InUnHealthy() {
-					replicaNodesToConsider = append(replicaNodesToConsider, g.nodes[i])
-				} else {
+
+				// If unhealthy node handling is enabled, we need to check the node's health status
+				if c.opt.EnableUnHealthyNodeHandling && cc.conn.InUnHealthy() {
 					globalLogger.Debugf("[valkey]node %s is unhealthy (could be due to timeouts or loading state), skipping it for slot assignment", g.nodes[i].Addr)
+				} else {
+					replicaNodesToConsider = append(replicaNodesToConsider, g.nodes[i])
 				}
 			}
 		}
